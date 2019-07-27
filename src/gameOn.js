@@ -32,20 +32,6 @@ module.exports = {
         return player;
     },
 
-    refreshPlayerSession: async function(player) {
-        console.time('gameOnClient.refreshPlayerSession() ');
-        refreshedPlayer = await gameOnClient.refreshPlayerSession(
-            {
-                gameApiKey:  config.custom.gameOn.publicApiKey,
-                appBuildType:  config.custom.gameOn.environment,
-                player: player,
-            }
-        );
-        console.timeEnd('gameOnClient.refreshPlayerSession() ');
-
-        return refreshedPlayer;
-    },
-
     submitScore: async function(player, score) {
         // Entering a match is required to (re-)enter a score
         console.time('gameOnClient.enterMatchForPlayer() ');

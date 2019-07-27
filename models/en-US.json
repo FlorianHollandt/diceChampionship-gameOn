@@ -1,8 +1,11 @@
 {
-	"invocation": "dice championship",
+	"invocation": "dice tournament",
 	"intents": [
 		{
 			"name": "YesIntent",
+			"alexa": {
+				"name": "AMAZON.YesIntent"
+			},
 			"phrases": [
 				"yes",
 				"sure",
@@ -11,6 +14,9 @@
 		},
 		{
 			"name": "NoIntent",
+			"alexa": {
+				"name": "AMAZON.NoIntent"
+			},
 			"phrases": [
 				"no",
 				"not now",

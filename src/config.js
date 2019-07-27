@@ -16,9 +16,11 @@ module.exports = {
         ],
     },
     intentMap: {
-       'AMAZON.StopIntent': 'END',
-       'AMAZON.CancelIntent': 'END',
-       'NoIntent': 'END',
+        'AMAZON.StopIntent': 'END',
+        'AMAZON.CancelIntent': 'END',
+        'AMAZON.NoIntent': 'END',
+        'AMAZON.YesIntent': 'YesIntent',
+        'AMAZON.HelpIntent': 'YesIntent',
     },
     custom: {
         gameOn: {
@@ -31,6 +33,7 @@ module.exports = {
             numberOfDice: 10,
             sidesPerDice: 6,
         },
+        version: process.env.VERSION
     },
  };
  

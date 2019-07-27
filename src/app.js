@@ -9,14 +9,12 @@ const config = require('./config');
 
 const { App } = require('jovo-framework');
 const { Alexa } = require('jovo-platform-alexa');
-const { GoogleAssistant } = require('jovo-platform-googleassistant');
 const { JovoDebugger } = require('jovo-plugin-debugger');
 
 const app = new App();
 
 app.use(
     new Alexa(),
-    new GoogleAssistant(),
     new JovoDebugger()
 );
 
@@ -27,52 +25,37 @@ app.use(
 
 app.setHandler({
 
-    async ON_REQUEST() {
-        let player;
-        if (this.isNewSession()) { // In real life, you'd use this.isNewUser() instead
-            player = await gameOn.initializeNewPlayer(this);
-        } else {
-            player = this.getSessionAttribute(
-                'gameOnPlayer'
-            );
-            player = await gameOn.refreshPlayerSession(player);
-        }
+    async NEW_SESSION() {
+        console.log(`NEW_SESSION()`);
 
+        let player = await gameOn.initializeNewPlayer(this);
         this.setSessionAttribute(
-            'gameOnPlayer',
+            'player',
             player
         );
-    },
 
-    async LAUNCH() {
         this.setSessionAttribute('previousHighscore', 0);
         this.setSessionAttribute('previousRank', 999999999);
 
-        this.$speech
-            .addText('Welcome to dice rolling championship!')
-            .addText('Let\'s see how high you can score by rolling ten dice.');
+        this.$speech.t('welcome-new');
 
         return this.toIntent('_rollDice');
     },
 
-    async END() {
-        this.$speech.addText('Thanks for playing. Bye!');
-
-        return this.tell(
-            this.$speech
-        );
-    },
-
     async YesIntent() {
-        this.$speech.addText('Awesome!');
+        console.log(`YesIntent()`);
+
+        this.$speech.t('confirm');
 
         return this.toIntent('_rollDice');
     },
 
     async _rollDice() {
+        console.log(`_rollDice()`);
+
         this.$speech
-            .addText('Here we go!')
-            .addText('<audio src="soundbank://soundlibrary/toys_games/board_games/board_games_08"/>');
+            .t('dice-intro')
+            .t('dice-sound');
         
         let sumOfDice = 0;
         for (let i = 0; i <  config.custom.game.numberOfDice; i++ ){
@@ -84,49 +67,71 @@ app.setHandler({
     },
 
     async _compareResult() {
-        const player = this.getSessionAttribute('gameOnPlayer');
+        const player = this.getSessionAttribute('player');
         const sumOfDice = this.$data.sumOfDice;
 
         const previousHighscore = this.getSessionAttribute('previousHighscore');
         const previousRank = this.getSessionAttribute('previousRank');
 
-        let soundEffect = "<audio src='soundbank://soundlibrary/ui/gameshow/amzn_ui_sfx_gameshow_tally_negative_01'/>";
-        let speechText = `Looks like you remain the <say-as interpret-as="ordinal">${previousRank}</say-as> place for now.`
+        let soundKey = 'result-sound-negative';
+        let speechKey = 'result-lowerScore';
 
         await gameOn.submitScore(player, sumOfDice);
         const rankingData = await gameOn.getRankingData(player);
+        console.log(`Ranking data: ${JSON.stringify(rankingData, null, 4)}`);
 
         if (sumOfDice > previousHighscore) {
             this.setSessionAttribute('previousHighscore', sumOfDice);
-            soundEffect = "<audio src='soundbank://soundlibrary/ui/gameshow/amzn_ui_sfx_gameshow_tally_positive_01'/>";
-            speechText = "Congrats, that's a new personal highscore!";
+            soundKey = 'result-sound-positive';
+            speechKey = 'result-newPersonalHighscore';
         }
         if (rankingData.rank < previousRank) {
             this.setSessionAttribute('previousRank', rankingData.rank);
-            soundEffect = "<audio src='soundbank://soundlibrary/ui/gameshow/amzn_ui_sfx_gameshow_tally_positive_01'/>";
-            speechText = `Congrats, this new personal highscore earns you the <say-as interpret-as="ordinal">${rankingData.rank}</say-as> place in the leaderbaord!`;
+            soundKey = 'result-sound-positive';
+            speechKey = 'result-higherRank';
         }
-        if (rankingData.rank === 1) {
-            speechText = "Congrats, that's the best score so far!";
+        if (
+            rankingData.rank === 1
+            && previousRank !== 1
+        ) {
+            speechKey = 'result-numberOneRank';
         }
 
         this.$speech
-            .addText(`Your score is `)
-            .addText(soundEffect)
-            .addText(` ${sumOfDice} points! `)
-            .addText(speechText);
+            .t(
+                'result-score',
+                {
+                    sound: this.speechBuilder().t(soundKey).toString(),
+                    score: sumOfDice,
+                }
+            )
+            .t(
+                speechKey,
+                {
+                    rank: rankingData.rank,
+                }
+            );
 
         return this.toIntent('_prompt');
     },
 
     async _prompt() {
-        const prompt = 'Do you want to try again?';
+        console.log(`_prompt()`);
 
         return this.ask(
-            this.$speech.addText(prompt),
-            this.$reprompt.addText(prompt)
+            this.$speech.t('prompt-short'),
+            this.$reprompt.t('prompt-short')
         );
-    }
+    },
+
+    async END() {
+        console.log(`END()`);
+        this.$speech.t('goodbye');
+
+        return this.tell(
+            this.$speech
+        );
+    },
 });
 
 module.exports.app = app;
