@@ -82,17 +82,18 @@ Here's how the logic of this implementation differs from the <a href="https://gi
    - Set the **end date of the tournament** to some point in the distant future to have just one single big open-ended tournament
    - Copy and paste the following **credentials** into your `.env` file:
      - `GAMEON_PUBLIC_API_KEY`: The public API key your received when you registered your new game at GameOn
-     - `GAMEON_TOURNAMENT_ID`: The tournament ID that you received after setting up a new challenge for your registered game (found in the URL of the competition detail page)
+     - `GAMEON_TOURNAMENT_ID`: The tournament ID that you received after setting up a new challenge for your registered game (found in the URL of the competition detail page, as seen in the screenshot below)
      - `GAMEON_MATCH_ID`: The match ID, also found in the competition detail page
-     - Each of these keys and IDs are `uuid`s, so they look similar to this: `01234567-0123-0123-0123-01234567abcd`.
+     - Each of these keys and IDs are `uuid`s, so they look similar to this: `01234567-0123-0123-0123-01234567abcd`.<br/>
+    <img src="https://dicechampionship.s3-eu-west-1.amazonaws.com/screenshots/gameOn_step6.png" width="60%"><br/>
 3. **Creating your Lambda function**
    - Setting up a Lambda function isn't required to try out this project (you can just test locally), but it's recommended because it's interesting to see how it behaves in terms of latency, and to have a version that works any time without being restricted to when you're running your Jovo webhook
    - Open the <a href="https://console.aws.amazon.com/lambda/home?#/functions">AWS Lambda functions overview</a> in your selected region and hit **Create function**.
    -  Give your Lambda a Node 8.10 runtime (or above) and a **basic execution role** with write access to Cloudwatch logs.
    -  Add **'Alexa Skills Kit' as a trigger** for your Lambda function. For now you can disable the restriction to a defined Skill ID.
-   -  Copy the **environment variable** from step 2 to the Lambda's environment variable section.
+   -  Copy the **environment variables** from step 2 to the Lambda's environment variable section.
    -  Copy the **Lambda's ARN** into your local `.env` file, as the value of `LAMBDA_ARN_STAGING` (more on staging below).
-5. **Creating the Alexa Skill**
+4. **Creating the Alexa Skill**
    - This is something you could do directly in the Alexa developer console, but here we're using the <a href="https://github.com/jovotech/jovo-cli">Jovo CLI</a> because it's super convenient. So be sure to have the Jovo CLI installed and optimally your <a href="https://developer.amazon.com/docs/smapi/quick-start-alexa-skills-kit-command-line-interface.html">ASK CLI and AWS CLI profiles set up</a>.
    - Write the name of the ASK CLI profile you plan to use into your local `.env` file as e.g. `ASK_PROFILE='default'`.
    - Now execute `jovo build -p alexaSkill --stage local --deploy` from your command line. This builds the Skill manifest (`platforms/alexaSkill/skill.json`) and language model (`platforms/alexaSkill/models/en-US.json`) from the information in the project configuration file (`project.js`) and the Jovo language model (`models/en-US.json`), and uses them to set up a new Skill 'Dice Tournament' in your Alexa developer console.<br/>
@@ -217,6 +218,13 @@ The remaining steps are optional, but recommended. Before we proceed to uploadin
    - To use production settings for your GameOn tournament, all you need is to 
    - To set up the **new Skill** (using the new Lambda endoint, the invocation name 'dice championship', and an expanded version of the manifest including a different Skill icon), execute `jovo build -p alexaSkill --stage live --deploy`. 
    - After the first deployment, copy the new Skill's ID and paste it as the value of `SKILL_ID_LIVE` in your `.env` file
+
+# Investigating your leaderboard
+
+Before checking your leaderboard, it makes sense to play some sessions so it's already populated. What's the highest score **you** can roll? :slot_machine:
+
+To see the items of your leaderboard in detail, simply go to your <a href="https://developer.amazon.com/gameon/console/home">GameOn overview page</a>, find the according game and competition/tournament, and click on the 'Details' link (as seen in the screenshot below). This will take you directly to the leaderboard.<br/>
+<img src="https://dicechampionship.s3-eu-west-1.amazonaws.com/screenshots/investigate_gameOn.png" width="60%">
 
 # Wrapping it up
 I hope you find both this entire project and the individual variants interesting and valuable. Again, if you like this project and want to see it implementing your favorite platform, service or feature, please get in touch or start implementing right away.
