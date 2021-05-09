@@ -10,7 +10,7 @@
     "jovo-framework": "^2.2.6",
     "jovo-platform-alexa": "^2.0.2",
     "jovo-plugin-debugger": "^2.0.2",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.21",
     "lodash.merge": "^4.6.2",
     "lodash.template": "^4.5.0",
     "mem": "^5.1.1"
